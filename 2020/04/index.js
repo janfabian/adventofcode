@@ -1,6 +1,7 @@
 const { debug } = require("../../lib/utils");
 
 const requiredFields = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"];
+// eslint-disable-next-line no-unused-vars
 const optionalFields = ["cid"];
 const validation = {
   byr: (v) => /^\d{4}$/.test(v) && parseInt(v) >= 1920 && parseInt(v) <= 2002,
