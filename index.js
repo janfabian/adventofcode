@@ -6,6 +6,9 @@ const dir = path.resolve(__dirname, args[0]);
 
 const inputData = input(dir, process.env.INPUT ? process.env.INPUT : "input");
 
-const fn = require(path.resolve(dir, "./index.js"));
+let fn = require(path.resolve(dir, "./index.js"));
 
+if (typeof fn !== "function") {
+  fn = fn[args[1]];
+}
 console.log(fn(inputData));
