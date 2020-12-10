@@ -35,7 +35,7 @@ module.exports = (input, preamble = 25) => {
     sequence.slice(0, Math.max(i, 0)).forEach((_n2, j) => {
       sequence[j] += n;
 
-      if (sequence[j] === weak) {
+      if (sequence[j] === weak && !start && !end) {
         start = j;
         end = i;
       }
