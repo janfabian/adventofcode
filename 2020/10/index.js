@@ -19,8 +19,9 @@ module.exports = (input) => {
 
   const cache = {};
   const combinations = (function iterate(arrangment) {
-    if (cache[arrangment.join("")]) {
-      return cache[arrangment.join("")];
+    const arrangmentDigest = arrangment.join("");
+    if (cache[arrangmentDigest]) {
+      return cache[arrangmentDigest];
     }
 
     const result = arrangment.reduce((arrangmentSum, n, i) => {
@@ -32,7 +33,7 @@ module.exports = (input) => {
       return arrangmentSum;
     }, 1);
 
-    cache[arrangment.join("")] = result;
+    cache[arrangmentDigest] = result;
 
     return result;
   })(diff);
