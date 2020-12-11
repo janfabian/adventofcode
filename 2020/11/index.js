@@ -5,23 +5,25 @@ const FLOOR = ".";
 const evalSeat = (map, i, idir, j, jdir) =>
   Number((map[i + idir] || [])[j + jdir] === OCCUPIED);
 
-const recalculate = (map, customEvalSeat = evalSeat) =>
+const recalculate = (map, customEvalSeat) =>
   map.map((line, i) =>
     line.map((place, j) =>
       [
-        customEvalSeat(map, i, 0, j, -1),
-        customEvalSeat(map, i, 0, j, +1),
-        customEvalSeat(map, i, -1, j, 0),
-        customEvalSeat(map, i, -1, j, -1),
-        customEvalSeat(map, i, -1, j, +1),
-        customEvalSeat(map, i, +1, j, 0),
-        customEvalSeat(map, i, +1, j, -1),
-        customEvalSeat(map, i, +1, j, +1),
-      ].reduce((sumocc, occ) => sumocc + occ, 0)
+        [0, -1],
+        [0, 1],
+        [-1, 0],
+        [-1, -1],
+        [-1, 1],
+        [1, 0],
+        [1, -1],
+        [1, 1],
+      ]
+        .map(([idir, jdir]) => customEvalSeat(map, i, idir, j, jdir))
+        .reduce((sumocc, occ) => sumocc + occ, 0)
     )
   );
 
-const refill = (map, calc, occupiedLimit = 4) =>
+const refill = (map, calc, occupiedLimit) =>
   calc.map((line, i) =>
     line.map((occupied, j) => {
       let place = map[i][j];
@@ -38,7 +40,7 @@ const refill = (map, calc, occupiedLimit = 4) =>
 
 const hash = (map) => map.map((l) => l.join("")).join("");
 
-const process = (input, opts = {}) => {
+const process = (input, opts = { occupiedLimit: 4, evalSeat }) => {
   let map = input
     .trimEnd()
     .split("\n")
@@ -64,7 +66,7 @@ const process = (input, opts = {}) => {
   );
 };
 
-module.exports.first = (input) => process(input);
+module.exports.first = process;
 
 module.exports.second = (input) =>
   process(input, {
