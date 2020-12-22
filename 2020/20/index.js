@@ -1,8 +1,11 @@
 const processTile = (tileInput) => {
   const a = tileInput[0];
   const b = tileInput.map((line) => line.slice(-1)).join("");
-  const c = tileInput.slice(-1)[0];
-  const d = tileInput.map((line) => line.slice(0, 1)).join("");
+  const c = [...tileInput.slice(-1)[0]].reverse().join("");
+  const d = tileInput
+    .map((line) => line.slice(0, 1))
+    .reverse()
+    .join("");
   const borders = [a, b, c, d];
 
   return [borders, borders.map((s) => [...s].reverse().join(""))];
@@ -73,7 +76,6 @@ const adjustCorner = (corner, next, bottom) => {
   const calc = (corner, next, isBottom = false) => {
     const [i, , flipped] = findAdjacent(processTile(corner), processTile(next));
     let rotations = (5 - i) % 4;
-    // 5 - i % 4
     // 0 1
     // 1 0
     // 2 3
@@ -85,66 +87,74 @@ const adjustCorner = (corner, next, bottom) => {
       // 2 0
       // 3 3
     }
-    console.log(rotations);
-    console.log(flipped);
     let result = corner;
+    for (let i = 0; i < rotations; i++) {
+      result = rotate90d(result);
+    }
+
     if (flipped) {
-      if (i % 2 === 0) {
+      // if (i % 2 === 0) {
+      //   result = flipX(result);
+      // } else {
+      //   result = flipY(result);
+      // }
+      if (isBottom) {
         result = flipX(result);
       } else {
         result = flipY(result);
       }
     }
 
-    for (let i = 0; i < rotations; i++) {
-      result = rotate90d(result);
-    }
+    // for (let i = 0; i < rotations; i++) {
+    //   result = rotate90d(result);
+    // }
 
     return result;
   };
   let result = calc(corner, next);
-  try {
-    adjustNext(bottom, corner);
-  } catch (e) {
-    result = calc(corner, bottom, true);
-    adjustNext(next, corner);
+  const bottomBorder = processTile(result)[0][2];
+
+  const bottomBorders = processTile(bottom);
+
+  if (
+    bottomBorders[0].includes(bottomBorder) ||
+    bottomBorders[1].includes(bottomBorder)
+  ) {
+    return result;
   }
+
+  result = calc(corner, bottom, true);
 
   return result;
 };
 
-const adjustNext = (current, next) => {
-  const [i, j, flipped] = findAdjacent(processTile(current), processTile(next));
-
-  // 0 1 -> 3
-  // 1 1 -> 2
-  // 2 1 -> 1
-  // 3 1 -> 0
-
-  // 0 2 -> 0
-  // 1 2 -> 3
-  // 2 2 -> 2
-  // 3 2 -> 1
+const adjustNext = (commonBorder, next, isBottom) => {
+  const [i, flipped] = findBorderAdjacent(commonBorder, processTile(next));
+  // console.log([i, flipped]);
   let rotations;
-  if (j === 1) {
-    rotations = 3 - i;
-  } else if (j === 2) {
+  if (isBottom) {
     rotations = (4 - i) % 4;
+    // 0 -> 0
+    // 1 -> 3
+    // 2 -> 2
+    // 3 -> 1
   } else {
-    throw new Error("unparsable");
+    rotations = 3 - i;
+    // 3 -> 0
+    // 0 -> 3
+    // 1 -> 2
+    // 2 -> 1
   }
-  // let rotations = Math.abs(j - i);
-  let result = current;
+  let result = next;
+  for (let i = 0; i < rotations; i++) {
+    result = rotate90d(result);
+  }
   if (flipped) {
-    if (i % 2 === 0) {
+    if (isBottom) {
       result = flipX(result);
     } else {
       result = flipY(result);
     }
-  }
-
-  for (let i = 0; i < rotations; i++) {
-    result = rotate90d(result);
   }
 
   return result;
@@ -194,11 +204,23 @@ const constructNextRow = (row, im, neighbours) => {
   return newRow;
 };
 
+const findBorderAdjacent = (border, t) => {
+  let i;
+  let flipped = false;
+  if (t[0].includes(border)) {
+    i = t[0].findIndex((i) => i === border);
+  } else if (t[1].includes(border)) {
+    i = t[1].findIndex((i) => i === border);
+    flipped = true;
+  }
+  return [i, flipped];
+};
+
 const findAdjacent = (t1, t2) => {
   let i = 0;
   let j;
   let flipped = false;
-  for (const border of t1[0]) {
+  for (let border of t1[0]) {
     if (t2[0].includes(border)) {
       j = [...t2[0]].findIndex((i) => i === border);
       break;
@@ -246,52 +268,49 @@ module.exports.second = (input) => {
 
   let prev;
   for (let y = 0; y < image.length; y++) {
+    if (y > 0) {
+      prev = image[y - 1][0];
+    }
     for (let x = 0; x < image[y].length; x++) {
       if (x === 0 && y === 0) {
         prev = adjustCorner(image[0][0], image[0][1], image[1][0]);
-        console.log(image[0][0]);
-        console.log("===");
-        console.log(prev);
+        // console.log(image[0][0].join("\n"));
+        // console.log("===");
+        // console.log(prev.join("\n"));
+        // console.log("====");
+        // console.log(image[0][1].join("\n"));
+        // console.log("====");
+        // console.log(image[1][0].join("\n"));
       } else {
-        prev = adjustNext(prev, image[y][x]);
+        // console.log(prev.join("\n"));
+        // console.log("====");
+        // console.log(image[y][x].join("\n"));
+        // console.log("====");
+        let commonBorder;
+        if (x === 0) {
+          commonBorder = processTile(prev)[1][2];
+        } else {
+          commonBorder = processTile(prev)[1][1];
+        }
+        prev = adjustNext(commonBorder, image[y][x], x === 0);
       }
       image[y][x] = prev;
     }
   }
 
-  console.log(image);
-
-  // image = image.map((y, yx) =>
-  //   y.reduce((s, x, xx) => {
-  //     x.forEach((r, rx) => {
-  //       if (yx !== image.length - 1) {
-  //         if (rx === x.length - 1) {
-  //           return;
-  //         }
-  //       }
-  //       if (xx !== y.length - 1) {
-  //         r = r.slice(0, -1);
-  //       }
-  //       s[rx] = (s[rx] || "") + r;
-  //     });
-  //     return s;
-  //   }, [])
-  // );
-
   // console.log(image);
-  const bla = adjustCorner(tiles[im[0][0]], tiles[im[0][1]]);
 
-  // console.log(bla.join("\n"));
-  // console.log("====");
-  // console.log(adjustNext(tiles[im[0][1]], bla).join("\n"));
-  // console.log(tiles[im[0][1]].join("\n"));
-  // console.log("====");
-  // console.log(tiles[im[1][0]].join("\n"));
-  // console.log("====");
-  // console.log(rotate90d(tiles[0]).join("\n"));
-  // console.log("====");
-  // console.log(flipX(tiles[0]).join("\n"));
-  // console.log("====");
-  // console.log(flipY(tiles[0]).join("\n"));
-  // console.log(image);
+  image = image
+    .map((y, yx) =>
+      y.reduce((s, x, xx) => {
+        x.slice(1, -1).forEach((r, rx) => {
+          r = r.slice(1, -1);
+          s[rx] = (s[rx] || "") + r;
+        });
+        return s;
+      }, [])
+    )
+    .reduce((s, a) => [...s, ...a], []);
+
+  console.log(image.join("\n"));
 };
