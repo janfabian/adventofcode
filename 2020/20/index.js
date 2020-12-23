@@ -265,13 +265,9 @@ const getSubset = (im, x, y, width, height) =>
 
 const containsMonster = (monster, subset) => {
   let result = 1;
-  let i = 0;
   monster.forEach((y, yx) =>
     [...y].forEach((x, xx) => {
       if (x === "#") {
-        if (subset[yx][xx] !== "#") {
-          i++;
-        }
         result &= subset[yx][xx] === "#";
       }
     })
@@ -281,7 +277,7 @@ const containsMonster = (monster, subset) => {
 };
 
 module.exports.second = (input) => {
-  const [, neighbours, tiles, tileNames] = first(input);
+  const [, neighbours, tiles] = first(input);
   const im = [constructFirstRow(neighbours)];
   while (im.length * im[0].length !== tiles.length) {
     const r = im.slice(-1)[0];
