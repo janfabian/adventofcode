@@ -93,21 +93,12 @@ const adjustCorner = (corner, next, bottom) => {
     }
 
     if (flipped) {
-      // if (i % 2 === 0) {
-      //   result = flipX(result);
-      // } else {
-      //   result = flipY(result);
-      // }
       if (isBottom) {
         result = flipX(result);
       } else {
         result = flipY(result);
       }
     }
-
-    // for (let i = 0; i < rotations; i++) {
-    //   result = rotate90d(result);
-    // }
 
     return result;
   };
@@ -130,7 +121,6 @@ const adjustCorner = (corner, next, bottom) => {
 
 const adjustNext = (commonBorder, next, isBottom) => {
   const [i, flipped] = findBorderAdjacent(commonBorder, processTile(next));
-  // console.log([i, flipped]);
   let rotations;
   if (isBottom) {
     rotations = (4 - i) % 4;
@@ -248,11 +238,46 @@ const rotate90d = (tile) => {
 };
 
 const flipY = (tile) => {
-  return [...tile.reverse()];
+  return [...tile.map((y) => [...y].join("")).reverse()];
 };
 
 const flipX = (tile) => {
   return [...tile.map((y) => [...y].reverse().join(""))];
+};
+
+const monsters = (() => {
+  const monster = `
+                  # 
+#    ##    ##    ###
+ #  #  #  #  #  #   
+`;
+  const m = monster.split("\n").slice(1, -1);
+  const m1 = rotate90d(rotate90d(m));
+  const m2 = rotate90d(m);
+  const m3 = rotate90d(rotate90d(rotate90d(m)));
+  return [m, flipX(m), m1, flipX(m1), m2, flipX(m2), m3, flipX(m3)];
+})();
+
+const sharpSize = (im) => [...im.join("")].filter((s) => s === "#").length;
+
+const getSubset = (im, x, y, width, height) =>
+  im.slice(y, y + height).map((l) => l.slice(x, x + width));
+
+const containsMonster = (monster, subset) => {
+  let result = 1;
+  let i = 0;
+  monster.forEach((y, yx) =>
+    [...y].forEach((x, xx) => {
+      if (x === "#") {
+        if (subset[yx][xx] !== "#") {
+          i++;
+        }
+        result &= subset[yx][xx] === "#";
+      }
+    })
+  );
+
+  return Boolean(result);
 };
 
 module.exports.second = (input) => {
@@ -274,18 +299,7 @@ module.exports.second = (input) => {
     for (let x = 0; x < image[y].length; x++) {
       if (x === 0 && y === 0) {
         prev = adjustCorner(image[0][0], image[0][1], image[1][0]);
-        // console.log(image[0][0].join("\n"));
-        // console.log("===");
-        // console.log(prev.join("\n"));
-        // console.log("====");
-        // console.log(image[0][1].join("\n"));
-        // console.log("====");
-        // console.log(image[1][0].join("\n"));
       } else {
-        // console.log(prev.join("\n"));
-        // console.log("====");
-        // console.log(image[y][x].join("\n"));
-        // console.log("====");
         let commonBorder;
         if (x === 0) {
           commonBorder = processTile(prev)[1][2];
@@ -298,11 +312,9 @@ module.exports.second = (input) => {
     }
   }
 
-  // console.log(image);
-
   image = image
-    .map((y, yx) =>
-      y.reduce((s, x, xx) => {
+    .map((y) =>
+      y.reduce((s, x) => {
         x.slice(1, -1).forEach((r, rx) => {
           r = r.slice(1, -1);
           s[rx] = (s[rx] || "") + r;
@@ -312,5 +324,25 @@ module.exports.second = (input) => {
     )
     .reduce((s, a) => [...s, ...a], []);
 
-  console.log(image.join("\n"));
+  let result = sharpSize(image);
+  const monsterSize = sharpSize(monsters[0]);
+  for (let y = 0; y < image.length; y++) {
+    for (let x = 0; x < image[y].length; x++) {
+      for (const monster of monsters) {
+        const width = monster[0].length;
+        const height = monster.length;
+
+        const subset = getSubset(image, x, y, width, height);
+        if (subset.length !== height || subset[0].length !== width) {
+          continue;
+        }
+
+        if (containsMonster(monster, subset)) {
+          result -= monsterSize;
+        }
+      }
+    }
+  }
+
+  return result;
 };
