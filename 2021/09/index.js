@@ -47,6 +47,31 @@ const calc_diffs = (bottom) => {
   return [x_left_diff, x_right_diff, y_down_diff, y_up_diff];
 };
 
+const find_lows = (
+  bottom,
+  x_left_diff,
+  x_right_diff,
+  y_down_diff,
+  y_up_diff
+) => {
+  const lows = [];
+
+  bottom.forEach((row, iy) =>
+    row.forEach((v, ix) => {
+      if (
+        x_left_diff[iy][ix] > 0 &&
+        x_right_diff[iy][ix] > 0 &&
+        y_down_diff[iy][ix] > 0 &&
+        y_up_diff[iy][ix] > 0
+      ) {
+        lows.push([iy, ix]);
+      }
+    })
+  );
+
+  return lows;
+};
+
 module.exports.part1 = (input) => {
   const bottom = input
     .split("\n")
@@ -56,28 +81,20 @@ module.exports.part1 = (input) => {
     bottom
   );
 
-  const result = bottom.reduce(
-    (t, row, iy) =>
-      t +
-      row.reduce((t, v, ix) => {
-        if (
-          x_left_diff[iy][ix] > 0 &&
-          x_right_diff[iy][ix] > 0 &&
-          y_down_diff[iy][ix] > 0 &&
-          y_up_diff[iy][ix] > 0
-        ) {
-          t += bottom[iy][ix] + 1;
-        }
-        return t;
-      }, 0),
-    0
+  const lows = find_lows(
+    bottom,
+    x_left_diff,
+    x_right_diff,
+    y_down_diff,
+    y_up_diff
   );
 
-  return result;
+  return lows.reduce((t, [iy, ix]) => (t += bottom[iy][ix] + 1), 0);
 };
 
 const BASIN_LIMIT = 9;
 const BASIN_COUNT = 3;
+
 const i_key = (iy, ix) => `${iy}_${ix}`;
 const crawl_basin = ([start_iy, start_ix], bottom) => {
   const visited = new Set();
@@ -117,19 +134,12 @@ module.exports.part2 = (input) => {
     bottom
   );
 
-  const lows = [];
-
-  bottom.forEach((row, iy) =>
-    row.forEach((v, ix) => {
-      if (
-        x_left_diff[iy][ix] > 0 &&
-        x_right_diff[iy][ix] > 0 &&
-        y_down_diff[iy][ix] > 0 &&
-        y_up_diff[iy][ix] > 0
-      ) {
-        lows.push([iy, ix]);
-      }
-    })
+  const lows = find_lows(
+    bottom,
+    x_left_diff,
+    x_right_diff,
+    y_down_diff,
+    y_up_diff
   );
 
   return lows
