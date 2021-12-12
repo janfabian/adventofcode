@@ -7,7 +7,7 @@
   "repository": {"url": ""},
   "devDependencies": {
     "eslint": "8.4.1",
-    "eslint-config-prettier": "6.15.0",
+    "eslint-config-prettier": "8.3.0",
     "eslint-plugin-prettier": "4.0.0",
     "jest": "27.4.4",
     "prettier": "2.5.1"
