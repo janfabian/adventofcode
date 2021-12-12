@@ -10,7 +10,7 @@
     "eslint-config-prettier": "6.15.0",
     "eslint-plugin-prettier": "4.0.0",
     "jest": "27.4.4",
-    "prettier": "2.2.1"
+    "prettier": "2.5.1"
   },
   "scripts": {
     "test": "jest"
