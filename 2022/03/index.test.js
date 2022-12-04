@@ -6,7 +6,7 @@ test("example 01 part1", () => {
   expect(fn.part1(input)).toStrictEqual(157n);
 });
 
-test("example 01 part1", () => {
+test("example 01 part2", () => {
   const input = readInput(__dirname, "./test01");
   expect(fn.part2(input)).toStrictEqual(70n);
 });
