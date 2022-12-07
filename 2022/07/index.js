@@ -74,7 +74,7 @@ function parseCommand(cmd, activeDir, output) {
   return newActiveDir;
 }
 
-function calculateSize(dir, a) {
+function calculateSize(dir) {
   if (dir.size) {
     return dir.size;
   }
