@@ -67,6 +67,15 @@ module.exports.part1 = (input) => {
 
         if (max[n] <= current_rate) {
           max[n] = current_rate;
+        }
+
+        const possible_rate =
+          current_rate +
+          Math.max(0, remaining_steps - 1) *
+            Number(!getBit(opened, BigInt(n))) *
+            graph[n][0];
+
+        if (max[n] <= possible_rate) {
           to_visit.push([n, current_rate, opened]);
         }
       }
