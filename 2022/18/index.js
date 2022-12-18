@@ -42,17 +42,17 @@ function tryEscape(
   cant_escapes_prev
 ) {
   const to_visit = [p];
-  const visited = new Set();
+  const blob = new Set();
 
   while (to_visit.length > 0) {
     const [x, y, z] = to_visit.shift();
 
     if (visited_prev.has(encode([x, y, z]))) {
-      return [true, visited];
+      return [true, blob];
     }
 
     if (cant_escapes_prev.has(encode([x, y, z]))) {
-      return [false, visited];
+      return [false, blob];
     }
 
     if (
@@ -63,7 +63,7 @@ function tryEscape(
       y > max_y ||
       z > max_z
     ) {
-      return [true, visited];
+      return [true, blob];
     }
 
     for (const [dx, dy, dz] of dirs) {
@@ -72,14 +72,14 @@ function tryEscape(
         continue;
       }
 
-      if (!visited.has(encode(n))) {
-        visited.add(encode(n));
+      if (!blob.has(encode(n))) {
+        blob.add(encode(n));
         to_visit.push(n);
       }
     }
   }
 
-  return [false, visited];
+  return [false, blob];
 }
 
 function parseCubes(input) {
